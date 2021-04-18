@@ -27,7 +27,6 @@ public class FingerRise extends ApplicationAdapter {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-
 		f1.update();
 		f2.update();
 
@@ -35,6 +34,7 @@ public class FingerRise extends ApplicationAdapter {
 
 		f1.draw(shapeRenderer);
 		f2.draw(shapeRenderer);
+
 		shapeRenderer.end();
 	}
 	
