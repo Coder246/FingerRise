@@ -7,18 +7,24 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 public class FingerPoint {
 
     private final Color color;
-    private float x ;
+    private float x;
     private float y;
+
+    private final float initX;
+    private final float initY;
+
     private float offsetX;
     private float offsetY;
     private int pointer = -1;
     private static final float radius = Gdx.graphics.getWidth() / 8f / 2;
-    private static final boolean[] globalUsedFingers = {false,false,false,false,false,false,false,false,false,false};
+    protected static final boolean[] globalUsedFingers = {false,false,false,false,false,false,false,false,false,false};
 
     public FingerPoint(float x, float y, Color color) {
         this.color = color;
         this.x = x;
         this.y = y;
+        this.initX = x;
+        this.initY = y;
     }
 
     void draw(ShapeRenderer renderer) {
@@ -80,4 +86,33 @@ public class FingerPoint {
         return  (Collision.object(x - radius-20, y - radius-20, radius * 2+40, radius * 2+40, Gdx.input.getX(pointer), Gdx.graphics.getHeight() - Gdx.input.getY(pointer), 3, 3));
     }
 
+    public float getX() {
+        return x;
+    }
+
+    public void setX(float x) {
+        this.x = x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public void setY(float y) {
+        this.y = y;
+    }
+
+    public static float getRadius() {
+        return radius;
+    }
+
+    public void resetPosition() {
+        this.x = this.initX;
+        this.y = this.initY;
+        this.pointer = -1;
+    }
+
+    public boolean ready() {
+        return pointer!=-1;
+    }
 }
