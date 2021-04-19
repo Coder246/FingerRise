@@ -20,8 +20,8 @@ public class FingerRise extends ApplicationAdapter {
 		f1 = new FingerPoint(Gdx.graphics.getWidth()/6f*2,Gdx.graphics.getHeight()/10f*2,new Color(1,0,0,1));
 		f2 = new FingerPoint(Gdx.graphics.getWidth()/6f*4,Gdx.graphics.getHeight()/10f*2,new Color(0,1,0,1));
 
-
-		LevelManager.loadLevel(Gdx.files.internal("1-1.json"));
+		LevelConfig.init();
+		LevelManager.loadLevel(LevelConfig.getCurrentLevel());
 
 	}
 

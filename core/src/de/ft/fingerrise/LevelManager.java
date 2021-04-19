@@ -15,15 +15,21 @@ import java.util.TimerTask;
 public class LevelManager {
 
     private static JSONArray obstacles;
+    private static JSONObject levelJSON;
     private static float levelProgress = 0;
-    private static final int delay = 4;
+    private static final int delay = 3;
     private static Timer timer = null;
-    private static boolean levelStarted = false;
+    public static boolean levelStarted = false;
+    private static Color tempColor = new Color();
 
     public static void loadLevel(FileHandle fh) {
 
         JSONObject level = new JSONObject(fh.readString());
+        levelJSON = level;
         obstacles = level.getJSONArray("obstacles");
+        for (int i = 0; i < obstacles.length(); i++) {
+            obstacles.getJSONObject(i).put("current_rotation", obstacles.getJSONObject(i).has("degrees") ? obstacles.getJSONObject(i).getInt("degrees") : 0);
+        }
 
         levelProgress = 0;
 
@@ -41,21 +47,32 @@ public class LevelManager {
             }
         }, 0, delay);
 
-
     }
+
+    static int speedCounter = 0;
 
     private static void update() {
-        if(levelStarted) {
-            levelProgress += 2;
-        }else if(FingerRise.f1.ready()&&FingerRise.f2.ready()){
+
+        if (speedCounter == 10) {
+            speedCounter = 0;
+        }
+
+        if (levelStarted) {
+            levelProgress += 3;
+        } else if (FingerRise.f1.ready() && FingerRise.f2.ready()) {
             levelStarted = true;
         }
+
+        updateDynamicPositions();
+        speedCounter++;
     }
+
+
 
     public static void drawLevel(ShapeRenderer shapeRenderer) {
 
+        boolean noObstaclesLeft = true;
         for (int i = 0; i < obstacles.length(); i++) {
-
 
             float x = obstacles.getJSONObject(i).getInt("x");
             float y = obstacles.getJSONObject(i).getInt("y");
@@ -67,26 +84,30 @@ public class LevelManager {
             w = Gdx.graphics.getWidth() / 100f * w;
             h = Gdx.graphics.getHeight() / 1000f * h;
 
-            float degrees = 0;
-            if(obstacles.getJSONObject(i).has("degrees")) degrees = obstacles.getJSONObject(i).getInt("degrees");
 
-            if (Collision.object(x, y + Gdx.graphics.getHeight() / 2f - levelProgress, w, h,0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight())) {
-                shapeRenderer.setColor(Color.valueOf(obstacles.getJSONObject(i).getString("color")));
+            float degrees = obstacles.getJSONObject(i).getInt("current_rotation");
 
-                shapeRenderer.rect(x, y + Gdx.graphics.getHeight() / 2f - levelProgress, w/2, h/2,w,h,1f,1f,degrees);
+            if (Collision.objectwithrotation(x, y + Gdx.graphics.getHeight() / 2f - levelProgress, w, h, degrees, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0)) {
+                shapeRenderer.setColor(Color.valueOf(obstacles.getJSONObject(i).getString("color"), tempColor));
 
-                checkPlayerCollision(x, y + Gdx.graphics.getHeight() / 2f - levelProgress, w, h, FingerRise.f1);
-                checkPlayerCollision(x, y + Gdx.graphics.getHeight() / 2f - levelProgress, w, h, FingerRise.f2);
+                shapeRenderer.rect(x, y + Gdx.graphics.getHeight() / 2f - levelProgress, w / 2, h / 2, w, h, 1f, 1f, degrees);
+
+                checkPlayerCollision(x, y + Gdx.graphics.getHeight() / 2f - levelProgress, w, h, degrees, FingerRise.f1);
+                checkPlayerCollision(x, y + Gdx.graphics.getHeight() / 2f - levelProgress, w, h, degrees, FingerRise.f2);
+                noObstaclesLeft = false;
             }
-
         }
+
+        if (noObstaclesLeft) {
+            nextLevel();
+        }
+
     }
 
-    private static void checkPlayerCollision(float x, float y, float w, float h, FingerPoint f) {
-        if (Collision.object(x, y, w, h, f.getX() - FingerPoint.getRadius(), f.getY() - FingerPoint.getRadius(), FingerPoint.getRadius() * 2, FingerPoint.getRadius() * 2)) {
+    private static void checkPlayerCollision(float x, float y, float w, float h, float rotation, FingerPoint f) {
+        if (Collision.objectwithrotation(x, y, w, h, rotation, f.getX() - FingerPoint.getRadius(), f.getY() - FingerPoint.getRadius(), FingerPoint.getRadius() * 2, FingerPoint.getRadius() * 2, 0)) {
             resetGame();
-            loadLevel(Gdx.files.internal("1-1.json"));
-
+            loadLevel(LevelConfig.getCurrentLevel());
         }
 
     }
@@ -98,6 +119,68 @@ public class LevelManager {
         Arrays.fill(FingerPoint.globalUsedFingers, false);
 
     }
+
+    public static void nextLevel() {
+        LevelConfig.nextLevel();
+        levelProgress = 0;
+        loadLevel(LevelConfig.getCurrentLevel());
+        levelStarted = true;
+
+    }
+
+    private static void updateDynamicPositions() {
+        for (int i = 0; i < obstacles.length(); i++) {
+            JSONObject currentObstacle = obstacles.getJSONObject(i);
+            if (currentObstacle.has("degrees") && currentObstacle.has("rotating") && currentObstacle.getBoolean("rotating")) {
+                if (speedCounter % currentObstacle.getInt("speed") == 0) {
+                    if (currentObstacle.getInt("current_rotation") - currentObstacle.getInt("degrees") > 360) {
+                        currentObstacle.put("current_rotation", currentObstacle.getInt("degrees"));
+                    } else {
+                        currentObstacle.put("current_rotation", currentObstacle.getInt("current_rotation") + 2);
+                    }
+
+
+                }
+
+            }
+
+
+            if (currentObstacle.has("reactOnPosition") && currentObstacle.getInt("reactOnPosition") < levelProgress) {
+
+                if (currentObstacle.has("positionXAfterReact")) {
+                    int x_diff = currentObstacle.getInt("x") - currentObstacle.getInt("positionXAfterReact");
+                    if (Math.abs(x_diff) > 5) {
+                        if (x_diff > 0) {
+                            currentObstacle.put("x", currentObstacle.getInt("x") - 1);
+                        } else {
+                            currentObstacle.put("x", currentObstacle.getInt("x") + 1);
+
+                        }
+                    }
+
+                }
+
+                if (currentObstacle.has("positionYAfterReact")) {
+                    int y_diff = currentObstacle.getInt("y") - currentObstacle.getInt("positionYAfterReact");
+                    if (Math.abs(y_diff) > 5) {
+                        if (y_diff > 0) {
+                            currentObstacle.put("y", currentObstacle.getInt("y") - 1);
+                        } else {
+                            currentObstacle.put("y", currentObstacle.getInt("y") + 1);
+
+                        }
+                    }
+
+                }
+
+
+            }
+
+
+        }
+
+    }
+
 
 
 }

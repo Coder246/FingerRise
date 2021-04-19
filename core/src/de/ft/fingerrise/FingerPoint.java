@@ -35,14 +35,17 @@ public class FingerPoint {
     void update() {
         if (pointer != -1) {
             if (Gdx.input.isTouched(pointer)) {
+
                 float newX = Gdx.input.getX(pointer) + radius / 2;
                 float newY = Gdx.graphics.getHeight() - Gdx.input.getY(pointer) + radius / 2;
-                if(Math.abs(newX-this.x)<300&&Math.abs(newY-this.y)<300) {
-                    if((newX+this.offsetX-radius)>0&&(newX+this.offsetX+radius)<Gdx.graphics.getWidth()) {
-                        this.x = newX + this.offsetX;
-                    }
-                    if((newY+this.offsetY-radius)>0&&(newY+this.offsetY+radius)<Gdx.graphics.getHeight()) {
-                        this.y = newY + this.offsetY;
+                if(Math.abs(newX-this.x)<500&&Math.abs(newY-this.y)<500) {
+                    if(LevelManager.levelStarted) {
+                        if ((newX + this.offsetX - radius) > 0 && (newX + this.offsetX + radius) < Gdx.graphics.getWidth()) {
+                            this.x = newX + this.offsetX;
+                        }
+                        if ((newY + this.offsetY - radius) > 0 && (newY + this.offsetY + radius) < Gdx.graphics.getHeight()) {
+                            this.y = newY + this.offsetY;
+                        }
                     }
                 }else{
                     globalUsedFingers[pointer] = false;
