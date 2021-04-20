@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import org.json.JSONException;
 
 public class FingerRise extends ApplicationAdapter {
 	SpriteBatch batch;
@@ -21,7 +22,11 @@ public class FingerRise extends ApplicationAdapter {
 		f2 = new FingerPoint(Gdx.graphics.getWidth()/6f*4,Gdx.graphics.getHeight()/10f*2,new Color(0,1,0,1));
 
 		LevelConfig.init();
-		LevelManager.loadLevel(LevelConfig.getCurrentLevel());
+		try {
+			LevelManager.loadLevel(LevelConfig.getCurrentLevel());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 
 	}
 
@@ -30,21 +35,8 @@ public class FingerRise extends ApplicationAdapter {
 		Gdx.gl.glClearColor(0, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		f1.update();
-		f2.update();
+		Game.render(shapeRenderer,batch);
 
-		shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
-		try {
-			LevelManager.drawLevel(shapeRenderer);
-		}catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		f1.draw(shapeRenderer);
-		f2.draw(shapeRenderer);
-
-		shapeRenderer.end();
 	}
 	
 	@Override

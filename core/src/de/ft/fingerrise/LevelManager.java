@@ -5,6 +5,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Arrays;
@@ -22,7 +23,7 @@ public class LevelManager {
     public static boolean levelStarted = false;
     private static Color tempColor = new Color();
 
-    public static void loadLevel(FileHandle fh) {
+    public static void loadLevel(FileHandle fh) throws JSONException {
 
         JSONObject level = new JSONObject(fh.readString());
         levelJSON = level;
@@ -43,7 +44,11 @@ public class LevelManager {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                update();
+                try {
+                    update();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }, 0, delay);
 
@@ -51,7 +56,7 @@ public class LevelManager {
 
     static int speedCounter = 0;
 
-    private static void update() {
+    private static void update() throws JSONException {
 
         if (speedCounter == 10) {
             speedCounter = 0;
@@ -69,7 +74,7 @@ public class LevelManager {
 
 
 
-    public static void drawLevel(ShapeRenderer shapeRenderer) {
+    public static void drawLevel(ShapeRenderer shapeRenderer) throws JSONException {
 
         boolean noObstaclesLeft = true;
         for (int i = 0; i < obstacles.length(); i++) {
@@ -107,7 +112,11 @@ public class LevelManager {
     private static void checkPlayerCollision(float x, float y, float w, float h, float rotation, FingerPoint f) {
         if (Collision.objectwithrotation(x, y, w, h, rotation, f.getX() - FingerPoint.getRadius(), f.getY() - FingerPoint.getRadius(), FingerPoint.getRadius() * 2, FingerPoint.getRadius() * 2, 0)) {
             resetGame();
-            loadLevel(LevelConfig.getCurrentLevel());
+            try {
+                loadLevel(LevelConfig.getCurrentLevel());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
     }
@@ -123,12 +132,16 @@ public class LevelManager {
     public static void nextLevel() {
         LevelConfig.nextLevel();
         levelProgress = 0;
-        loadLevel(LevelConfig.getCurrentLevel());
+        try {
+            loadLevel(LevelConfig.getCurrentLevel());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         levelStarted = true;
 
     }
 
-    private static void updateDynamicPositions() {
+    private static void updateDynamicPositions() throws JSONException {
         for (int i = 0; i < obstacles.length(); i++) {
             JSONObject currentObstacle = obstacles.getJSONObject(i);
             if (currentObstacle.has("degrees") && currentObstacle.has("rotating") && currentObstacle.getBoolean("rotating")) {
