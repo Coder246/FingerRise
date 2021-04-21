@@ -7,11 +7,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import de.ft.fingerrise.JSON.JSONArray;
 import de.ft.fingerrise.JSON.JSONException;
 import de.ft.fingerrise.JSON.JSONObject;
-
-
 import java.util.Arrays;
-import java.util.Timer;
-import java.util.TimerTask;
+
 
 
 public class LevelManager {
@@ -20,7 +17,7 @@ public class LevelManager {
     private static JSONObject levelJSON;
     private static float levelProgress = 0;
     public static boolean levelStarted = false;
-    private static Color tempColor = new Color();
+    private static final Color tempColor = new Color();
 
     public static void loadLevel(FileHandle fh) throws JSONException {
 

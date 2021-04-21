@@ -9,6 +9,7 @@ public class LevelConfig {
     public static final String LEVEL_1_1 = "1-1.json";
     public static final String LEVEL_1_2 = "1-2.json";
     public static int currentLevel = 0;
+    public static int highestLevel = 0;
     public static ArrayList<String> level = new ArrayList<>();
 
     public static void init() {
@@ -17,12 +18,15 @@ public class LevelConfig {
     }
 
     public static FileHandle getCurrentLevel() {
-       return Gdx.files.internal(level.get(currentLevel));
+        return Gdx.files.internal(level.get(currentLevel));
     }
 
     public static void nextLevel() {
-        if(currentLevel<level.size()-1) {
+        if (currentLevel < level.size() - 1) {
             currentLevel++;
+            if (currentLevel > highestLevel) {
+                highestLevel = currentLevel;
+            }
         }
     }
 

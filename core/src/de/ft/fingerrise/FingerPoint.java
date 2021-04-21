@@ -116,7 +116,14 @@ public class FingerPoint {
     public void resetPosition() {
         this.x = this.initX;
         this.y = this.initY;
+        if(this.pointer!=-1) {
+            FingerPoint.globalUsedFingers[this.pointer] = false;
+        }
         this.pointer = -1;
+    }
+
+    public float getInitY() {
+        return initY;
     }
 
     public boolean ready() {
