@@ -39,7 +39,7 @@ public class FingerPoint {
                 float newX = Gdx.input.getX(pointer) + radius / 2;
                 float newY = Gdx.graphics.getHeight() - Gdx.input.getY(pointer) + radius / 2;
                 if(Math.abs(newX-this.x)<500&&Math.abs(newY-this.y)<500) {
-                    if(LevelManager.levelStarted) {
+                    if(LevelManager.levelStarted||Game.inMenu) {
                         if ((newX + this.offsetX - radius) > 0 && (newX + this.offsetX + radius) < Gdx.graphics.getWidth()) {
                             this.x = newX + this.offsetX;
                         }
@@ -91,6 +91,10 @@ public class FingerPoint {
 
     public float getX() {
         return x;
+    }
+
+    public float getInitX() {
+        return initX;
     }
 
     public void setX(float x) {

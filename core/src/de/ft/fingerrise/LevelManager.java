@@ -4,9 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import de.ft.fingerrise.JSON.JSONArray;
+import de.ft.fingerrise.JSON.JSONException;
+import de.ft.fingerrise.JSON.JSONObject;
+
 
 import java.util.Arrays;
 import java.util.Timer;
@@ -18,8 +19,6 @@ public class LevelManager {
     private static JSONArray obstacles;
     private static JSONObject levelJSON;
     private static float levelProgress = 0;
-    private static final int delay = 3;
-    private static Timer timer = null;
     public static boolean levelStarted = false;
     private static Color tempColor = new Color();
 
@@ -34,42 +33,22 @@ public class LevelManager {
 
         levelProgress = 0;
 
-        if (timer != null) {
-            timer.cancel();
-        }
-
         levelStarted = false;
 
-        timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    update();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, 0, delay);
 
     }
 
-    static int speedCounter = 0;
 
-    private static void update() throws JSONException {
+    public static void update(float DeltaTime) throws JSONException {
 
-        if (speedCounter == 10) {
-            speedCounter = 0;
-        }
 
         if (levelStarted) {
-            levelProgress += 3;
+            levelProgress += 984*DeltaTime;
         } else if (FingerRise.f1.ready() && FingerRise.f2.ready()) {
             levelStarted = true;
         }
 
-        updateDynamicPositions();
-        speedCounter++;
+        updateDynamicPositions(DeltaTime);
     }
 
 
@@ -131,29 +110,31 @@ public class LevelManager {
 
     public static void nextLevel() {
         LevelConfig.nextLevel();
-        levelProgress = 0;
         try {
             loadLevel(LevelConfig.getCurrentLevel());
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        levelProgress = -1200;
+
         levelStarted = true;
 
     }
 
-    private static void updateDynamicPositions() throws JSONException {
+    private static void updateDynamicPositions(float DeltaTime) throws JSONException {
         for (int i = 0; i < obstacles.length(); i++) {
             JSONObject currentObstacle = obstacles.getJSONObject(i);
             if (currentObstacle.has("degrees") && currentObstacle.has("rotating") && currentObstacle.getBoolean("rotating")) {
-                if (speedCounter % currentObstacle.getInt("speed") == 0) {
-                    if (currentObstacle.getInt("current_rotation") - currentObstacle.getInt("degrees") > 360) {
+
+
+                currentObstacle.put("current_rotation", currentObstacle.getInt("current_rotation") + 622f/(float)currentObstacle.getInt("speed")*DeltaTime);
+
+
+                if (currentObstacle.getInt("current_rotation") - currentObstacle.getInt("degrees") > 360) {
                         currentObstacle.put("current_rotation", currentObstacle.getInt("degrees"));
-                    } else {
-                        currentObstacle.put("current_rotation", currentObstacle.getInt("current_rotation") + 2);
                     }
 
 
-                }
 
             }
 
@@ -164,9 +145,9 @@ public class LevelManager {
                     int x_diff = currentObstacle.getInt("x") - currentObstacle.getInt("positionXAfterReact");
                     if (Math.abs(x_diff) > 5) {
                         if (x_diff > 0) {
-                            currentObstacle.put("x", currentObstacle.getInt("x") - 1);
+                            currentObstacle.put("x", currentObstacle.getInt("x") - 331.33f*DeltaTime);
                         } else {
-                            currentObstacle.put("x", currentObstacle.getInt("x") + 1);
+                            currentObstacle.put("x", currentObstacle.getInt("x") + 331.33f*DeltaTime);
 
                         }
                     }
@@ -177,9 +158,9 @@ public class LevelManager {
                     int y_diff = currentObstacle.getInt("y") - currentObstacle.getInt("positionYAfterReact");
                     if (Math.abs(y_diff) > 5) {
                         if (y_diff > 0) {
-                            currentObstacle.put("y", currentObstacle.getInt("y") - 1);
+                            currentObstacle.put("y", currentObstacle.getInt("y") - 331.33f*DeltaTime);
                         } else {
-                            currentObstacle.put("y", currentObstacle.getInt("y") + 1);
+                            currentObstacle.put("y", currentObstacle.getInt("y") + 331.33f*DeltaTime);
 
                         }
                     }
@@ -194,6 +175,7 @@ public class LevelManager {
 
     }
 
-
-
+    public static void setLevelProgress(float levelProgress) {
+        LevelManager.levelProgress = levelProgress;
+    }
 }
