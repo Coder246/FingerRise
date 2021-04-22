@@ -17,6 +17,7 @@ public class Game {
     static boolean disabledCurrentMovementF1 = false;
     static boolean disabledCurrentMovementF2 = false;
 
+
     public static void render(float DeltaTime, ShapeRenderer shapeRenderer, SpriteBatch batch) {
 
 
@@ -27,7 +28,7 @@ public class Game {
 
         if (!inMenu) {
             try {
-                LevelManager.drawLevel(shapeRenderer);
+                LevelManager.drawLevel(shapeRenderer,DeltaTime);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -40,7 +41,7 @@ public class Game {
         //start Game
         if (FingerRise.f1.ready() && FingerRise.f2.ready() && disabledCurrentMovementF2 && disabledCurrentMovementF1 && inMenu) {
             LevelManager.loadLevel(LevelConfig.getCurrentLevel());
-            LevelManager.setLevelProgress(-800);
+            LevelManager.setLevelProgress(-416);
             inMenu = false;
             disabledCurrentMovementF2 = false;
             disabledCurrentMovementF1 = false;
@@ -72,8 +73,14 @@ public class Game {
             f1Up = true;
             f2Up = false;
 
+            Gdx.input.vibrate(50);
+
+
             FingerRise.f1.resetPosition();
             FingerRise.f2.resetPosition();
+
+            FingerRise.f1.setAllowFingerDrag(true);
+            FingerRise.f2.setAllowFingerDrag(true);
 
         }
 

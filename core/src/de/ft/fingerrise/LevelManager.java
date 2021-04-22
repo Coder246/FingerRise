@@ -19,6 +19,8 @@ public class LevelManager {
     public static boolean levelStarted = false;
     private static final Color tempColor = new Color();
 
+    static boolean isLoosing = false;
+
     public static void loadLevel(FileHandle fh) throws JSONException {
 
         JSONObject level = new JSONObject(fh.readString());
@@ -29,8 +31,8 @@ public class LevelManager {
         }
 
         levelProgress = 0;
-
         levelStarted = false;
+
 
 
     }
@@ -38,9 +40,9 @@ public class LevelManager {
 
     public static void update(float DeltaTime) throws JSONException {
 
-
+        if(isLoosing) return;
         if (levelStarted) {
-            levelProgress += 984*DeltaTime;
+            levelProgress += 487*DeltaTime;
         } else if (FingerRise.f1.ready() && FingerRise.f2.ready()) {
             levelStarted = true;
         }
@@ -50,7 +52,10 @@ public class LevelManager {
 
 
 
-    public static void drawLevel(ShapeRenderer shapeRenderer) throws JSONException {
+    public static void drawLevel(ShapeRenderer shapeRenderer,float DeltaTime) throws JSONException {
+        if(isLoosing) {
+            resetLevel(DeltaTime);
+        }
 
         boolean noObstaclesLeft = true;
         for (int i = 0; i < obstacles.length(); i++) {
@@ -68,42 +73,56 @@ public class LevelManager {
 
             float degrees = obstacles.getJSONObject(i).getInt("current_rotation");
 
-            if (Collision.objectwithrotation(x, y + Gdx.graphics.getHeight() / 2f - levelProgress, w, h, degrees, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0)) {
+            if (Collision.objectwithrotation(x, y + Gdx.graphics.getHeight() / 2f - (levelProgress*Gdx.graphics.getHeight()/1000f), w, h, degrees, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0)) {
                 shapeRenderer.setColor(Color.valueOf(obstacles.getJSONObject(i).getString("color"), tempColor));
 
-                shapeRenderer.rect(x, y + Gdx.graphics.getHeight() / 2f - levelProgress, w / 2, h / 2, w, h, 1f, 1f, degrees);
+                shapeRenderer.rect(x, y + Gdx.graphics.getHeight() / 2f - (levelProgress*Gdx.graphics.getHeight()/1000f), w / 2, h / 2, w, h, 1f, 1f, degrees);
 
-                checkPlayerCollision(x, y + Gdx.graphics.getHeight() / 2f - levelProgress, w, h, degrees, FingerRise.f1);
-                checkPlayerCollision(x, y + Gdx.graphics.getHeight() / 2f - levelProgress, w, h, degrees, FingerRise.f2);
-                noObstaclesLeft = false;
+                if(!isLoosing) {
+                    checkPlayerCollision(x, y + Gdx.graphics.getHeight() / 2f - (levelProgress*Gdx.graphics.getHeight()/1000f), w, h, degrees, FingerRise.f1,DeltaTime);
+                    checkPlayerCollision(x, y + Gdx.graphics.getHeight() / 2f - (levelProgress*Gdx.graphics.getHeight()/1000f), w, h, degrees, FingerRise.f2,DeltaTime);
+                }
+              noObstaclesLeft = false;
             }
         }
 
-        if (noObstaclesLeft) {
+        if (noObstaclesLeft&&!isLoosing) {
             nextLevel();
         }
 
     }
 
-    private static void checkPlayerCollision(float x, float y, float w, float h, float rotation, FingerPoint f) {
+    private static void checkPlayerCollision(float x, float y, float w, float h, float rotation, FingerPoint f,float DeltaTime) {
         if (Collision.objectwithrotation(x, y, w, h, rotation, f.getX() - FingerPoint.getRadius(), f.getY() - FingerPoint.getRadius(), FingerPoint.getRadius() * 2, FingerPoint.getRadius() * 2, 0)) {
-            resetGame();
+           float old_progress = levelProgress;
+            resetGame(DeltaTime);
             try {
                 loadLevel(LevelConfig.getCurrentLevel());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+            levelProgress = old_progress;
         }
 
     }
 
-    public static void resetGame() {
 
-        FingerRise.f1.resetPosition();
-        FingerRise.f2.resetPosition();
+
+
+
+    public static void resetGame(float deltaTime) {
+
+
         Arrays.fill(FingerPoint.globalUsedFingers, false);
+        Gdx.input.vibrate(100);
+        isLoosing = true;
+        FingerRise.f1.looseFinger();
+        FingerRise.f2.looseFinger();
+
 
     }
+
+
 
     public static void nextLevel() {
         LevelConfig.nextLevel();
@@ -112,7 +131,7 @@ public class LevelManager {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        levelProgress = -1200;
+        levelProgress = -500;
 
         levelStarted = true;
 
@@ -136,7 +155,7 @@ public class LevelManager {
             }
 
 
-            if (currentObstacle.has("reactOnPosition") && currentObstacle.getInt("reactOnPosition") < levelProgress) {
+            if (currentObstacle.has("reactOnPosition") && currentObstacle.getInt("reactOnPosition") < (levelProgress*Gdx.graphics.getHeight()/1000f)) {
 
                 if (currentObstacle.has("positionXAfterReact")) {
                     int x_diff = currentObstacle.getInt("x") - currentObstacle.getInt("positionXAfterReact");
@@ -174,5 +193,52 @@ public class LevelManager {
 
     public static void setLevelProgress(float levelProgress) {
         LevelManager.levelProgress = levelProgress;
+    }
+
+
+
+    public static void resetLevel(float deltaTime) {
+
+        if(!FingerRise.f1.ready()) {
+            FingerRise.f1.setY(FingerRise.f1.getY()+((FingerRise.f1.getInitY()-FingerRise.f1.getY()))*deltaTime*3);
+            FingerRise.f1.setX(FingerRise.f1.getX()+((FingerRise.f1.getInitX()-FingerRise.f1.getX()))*deltaTime*3);
+        }
+        if(!FingerRise.f2.ready()) {
+            FingerRise.f2.setX(FingerRise.f2.getX()+((FingerRise.f2.getInitX()-FingerRise.f2.getX()))*deltaTime*3);
+            FingerRise.f2.setY(FingerRise.f2.getY()+((FingerRise.f2.getInitY()-FingerRise.f2.getY()))*deltaTime*3);
+        }
+
+        if(levelProgress>0) {
+            levelProgress -= (levelProgress) * deltaTime * 4;
+        }
+
+        if(levelProgress-30<=0) {
+
+            FingerRise.f1.setAllowFingerDrag(true);
+            FingerRise.f2.setAllowFingerDrag(true);
+
+        }else{
+            FingerRise.f1.setAllowFingerDrag(false);
+            FingerRise.f2.setAllowFingerDrag(false);
+        }
+
+
+        if(levelProgress-5<=0) {
+            if(Math.abs(FingerRise.f1.getInitX()-FingerRise.f1.getX())<3&&Math.abs(FingerRise.f2.getInitX()-FingerRise.f2.getX())<3) {
+                if(Math.abs(FingerRise.f1.getInitY()-FingerRise.f1.getY())<3&&Math.abs(FingerRise.f2.getInitY()-FingerRise.f2.getY())<3) {
+                    isLoosing = false;
+
+                }
+
+            }
+
+        }
+
+
+        if(FingerRise.f1.ready()&&FingerRise.f2.ready()) {
+            isLoosing = false;
+        }
+
+
     }
 }

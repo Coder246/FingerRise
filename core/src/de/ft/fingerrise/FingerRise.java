@@ -2,6 +2,8 @@ package de.ft.fingerrise;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -21,21 +23,32 @@ public class FingerRise extends ApplicationAdapter {
 	public static BitmapFont titleFont;
 	public static BitmapFont font;
 	public static GlyphLayout glyphLayout;
+	public static Sound click;
+	public static long click_Sound_ID = -1;
+	public static Preferences settings;
 
 	@Override
 	public void create () {
 		back = new Texture("back.png");
 		batch = new SpriteBatch();
+		click = Gdx.audio.newSound(Gdx.files.internal("click.mp3"));
 		shapeRenderer = new ShapeRenderer();
 		glyphLayout = new GlyphLayout();
+
+		settings = Gdx.app.getPreferences("settings");
+		Settings.init();
+
 		f1 = new FingerPoint(Gdx.graphics.getWidth()/6f*2,Gdx.graphics.getHeight()*4f/12f,new Color(1,0,0,1));
 		f2 = new FingerPoint(Gdx.graphics.getWidth()/6f*4,Gdx.graphics.getHeight()*4f/12f,new Color(0,1,0,1));
 
 		titleFont = buildFont("titlefont.ttf",150,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890\"!`?'.,;:()[]{}<>|/@\\^$-%+=#_&~*");
 		font = buildFont("font.ttf",110,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890\"!`?'.,;:()[]{}<>|/@\\^$-%+=#_&~*");
-
 		LevelConfig.init();
+
+		System.out.println(LevelConfig.currentLevel);
 		LevelManager.loadLevel(LevelConfig.getCurrentLevel());
+
+
 
 	}
 

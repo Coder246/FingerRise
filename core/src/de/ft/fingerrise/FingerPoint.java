@@ -13,11 +13,13 @@ public class FingerPoint {
     private final float initX;
     private final float initY;
 
+    private boolean allowFingerDrag = true;
+
     private float offsetX;
     private float offsetY;
     private int pointer = -1;
     private static final float radius = Gdx.graphics.getWidth() / 8f / 2;
-    protected static final boolean[] globalUsedFingers = {false,false,false,false,false,false,false,false,false,false};
+    protected static final boolean[] globalUsedFingers = {false, false, false, false, false, false, false, false, false, false};
 
     public FingerPoint(float x, float y, Color color) {
         this.color = color;
@@ -38,8 +40,8 @@ public class FingerPoint {
 
                 float newX = Gdx.input.getX(pointer) + radius / 2;
                 float newY = Gdx.graphics.getHeight() - Gdx.input.getY(pointer) + radius / 2;
-                if(Math.abs(newX-this.x)<500&&Math.abs(newY-this.y)<500) {
-                    if(LevelManager.levelStarted||Game.inMenu) {
+                if (Math.abs(newX - this.x) < 500 && Math.abs(newY - this.y) < 500) {
+                    if (LevelManager.levelStarted || Game.inMenu) {
                         if ((newX + this.offsetX - radius) > 0 && (newX + this.offsetX + radius) < Gdx.graphics.getWidth()) {
                             this.x = newX + this.offsetX;
                         }
@@ -47,7 +49,7 @@ public class FingerPoint {
                             this.y = newY + this.offsetY;
                         }
                     }
-                }else{
+                } else {
                     globalUsedFingers[pointer] = false;
                     pointer = -1;
                 }
@@ -56,15 +58,17 @@ public class FingerPoint {
                 globalUsedFingers[pointer] = false;
                 pointer = -1;
             }
-        } else {
+        } else if(allowFingerDrag){
             if (Gdx.input.justTouched()) {
-                int tempPointerValue = lowestPossiblePointer(this.x,this.y);
+                int tempPointerValue = lowestPossiblePointer(this.x, this.y);
                 if (tempPointerValue != -1) {
-                    System.out.println(tempPointerValue);
-                        globalUsedFingers[tempPointerValue] = true;
-                        this.pointer = tempPointerValue;
-                        this.offsetX = x - Gdx.input.getX(pointer)-radius/2;
-                        this.offsetY = y - (Gdx.graphics.getHeight() - Gdx.input.getY(pointer))-radius/2;
+                    Gdx.input.vibrate(30);
+                    FingerRise.click.play();
+                    globalUsedFingers[tempPointerValue] = true;
+                    this.pointer = tempPointerValue;
+
+                    this.offsetX = x - Gdx.input.getX(pointer) - radius / 2;
+                    this.offsetY = y - (Gdx.graphics.getHeight() - Gdx.input.getY(pointer)) - radius / 2;
 
                 }
 
@@ -75,9 +79,9 @@ public class FingerPoint {
 
     }
 
-    private static int lowestPossiblePointer(float x,float y) {
-        for(int i=0;i<globalUsedFingers.length;i++) {
-            if(!globalUsedFingers[i]&&isPointerRange(i,x,y)) {
+    private  int lowestPossiblePointer(float x, float y) {
+        for (int i = 0; i < globalUsedFingers.length; i++) {
+            if (!globalUsedFingers[i] && isPointerRange(i, x, y)) {
                 return i;
             }
         }
@@ -85,8 +89,8 @@ public class FingerPoint {
 
     }
 
-    private static boolean isPointerRange (int pointer,float x,float y) {
-        return  (Collision.object(x - radius-20, y - radius-20, radius * 2+40, radius * 2+40, Gdx.input.getX(pointer), Gdx.graphics.getHeight() - Gdx.input.getY(pointer), 3, 3));
+    private  boolean isPointerRange(int pointer, float x, float y) {
+        return (Collision.object(x - radius - 20, y - radius - 20, radius * 2 + 40, radius * 2 + 40, Gdx.input.getX(pointer), Gdx.graphics.getHeight() - Gdx.input.getY(pointer), 3, 3));
     }
 
     public float getX() {
@@ -116,7 +120,14 @@ public class FingerPoint {
     public void resetPosition() {
         this.x = this.initX;
         this.y = this.initY;
-        if(this.pointer!=-1) {
+        if (this.pointer != -1) {
+            FingerPoint.globalUsedFingers[this.pointer] = false;
+        }
+        this.pointer = -1;
+    }
+
+    public  void looseFinger() {
+        if (this.pointer != -1) {
             FingerPoint.globalUsedFingers[this.pointer] = false;
         }
         this.pointer = -1;
@@ -127,6 +138,21 @@ public class FingerPoint {
     }
 
     public boolean ready() {
-        return pointer!=-1;
+        return pointer != -1;
     }
+
+    public void setAllowFingerDrag(boolean allow) {
+        if(allow) {
+            allowFingerDrag = true;
+        }else{
+            if (this.pointer != -1) {
+                FingerPoint.globalUsedFingers[this.pointer] = false;
+            }
+            this.pointer = -1;
+            allowFingerDrag = false;
+        }
+
+    }
+
+
 }
