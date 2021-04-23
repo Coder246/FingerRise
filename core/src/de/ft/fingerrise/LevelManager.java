@@ -131,7 +131,7 @@ public class LevelManager {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        levelProgress = -500;
+        levelProgress = -480;
 
         levelStarted = true;
 

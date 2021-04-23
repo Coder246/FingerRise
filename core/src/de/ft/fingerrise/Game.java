@@ -37,16 +37,19 @@ public class Game {
         } else {
             drawFingerPointMovingPath(shapeRenderer);
             fingerPointInMenuMovement(DeltaTime);
-        }
-        //start Game
-        if (FingerRise.f1.ready() && FingerRise.f2.ready() && disabledCurrentMovementF2 && disabledCurrentMovementF1 && inMenu) {
-            LevelManager.loadLevel(LevelConfig.getCurrentLevel());
-            LevelManager.setLevelProgress(-416);
-            inMenu = false;
-            disabledCurrentMovementF2 = false;
-            disabledCurrentMovementF1 = false;
+            //start Game
+            if (FingerRise.f1.ready() && FingerRise.f2.ready() && disabledCurrentMovementF2 && disabledCurrentMovementF1 && inMenu) {
+                LevelManager.loadLevel(LevelConfig.getCurrentLevel());
+                LevelManager.setLevelProgress(-416);
+                inMenu = false;
+                LevelManager.levelStarted = true;
+                disabledCurrentMovementF2 = false;
+                disabledCurrentMovementF1 = false;
+
+            }
 
         }
+
 
 
         FingerRise.f1.draw(shapeRenderer);

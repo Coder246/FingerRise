@@ -24,7 +24,6 @@ public class FingerRise extends ApplicationAdapter {
 	public static BitmapFont font;
 	public static GlyphLayout glyphLayout;
 	public static Sound click;
-	public static long click_Sound_ID = -1;
 	public static Preferences settings;
 
 	@Override
