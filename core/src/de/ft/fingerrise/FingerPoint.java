@@ -64,7 +64,12 @@ public class FingerPoint {
                 int tempPointerValue = lowestPossiblePointer(this.x, this.y);
                 if (tempPointerValue != -1) {
                     Gdx.input.vibrate(30);
-                    FingerRise.click.play();
+                    new Thread() {
+                        @Override
+                        public void run() {
+                            FingerRise.click.play();
+                        }
+                    }.start();
                     globalUsedFingers[tempPointerValue] = true;
                     this.pointer = tempPointerValue;
 

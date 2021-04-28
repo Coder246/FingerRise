@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
 
 public class FingerRise extends ApplicationAdapter {
 	SpriteBatch batch;
@@ -30,7 +31,7 @@ public class FingerRise extends ApplicationAdapter {
 	public void create () {
 		back = new Texture("back.png");
 		batch = new SpriteBatch();
-		click = Gdx.audio.newSound(Gdx.files.internal("click.mp3"));
+		click = Gdx.audio.newSound(Gdx.files.internal("click.wav"));
 		shapeRenderer = new ShapeRenderer();
 		glyphLayout = new GlyphLayout();
 
@@ -68,6 +69,9 @@ public class FingerRise extends ApplicationAdapter {
 			font.draw(batch, "Catch Circles to Start!", Gdx.graphics.getWidth() / 2f - glyphLayout.width / 2, Gdx.graphics.getHeight() / 10f * 8f);
 		}
 		batch.end();
+
+
+
 
 	}
 	

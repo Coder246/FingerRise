@@ -25,6 +25,7 @@ public class Game {
         FingerRise.f2.update();
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setAutoShapeType(true);
 
         if (!inMenu) {
             try {
