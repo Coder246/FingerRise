@@ -1,11 +1,9 @@
 package de.ft.fingerrise;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g2d.Gdx2DPixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-
-import java.util.Arrays;
+import com.badlogic.gdx.math.Vector3;
 
 
 public class Game {
@@ -16,7 +14,8 @@ public class Game {
     static boolean f2Up = false;
     static boolean disabledCurrentMovementF1 = false;
     static boolean disabledCurrentMovementF2 = false;
-
+    static Vector3 mousePressPosMenu = new Vector3(); //The third position of the vector is used to store the touch pointer index
+    static boolean isMenuPointerPressed = false;
 
     public static void render(float DeltaTime, ShapeRenderer shapeRenderer, SpriteBatch batch) {
 
@@ -24,12 +23,14 @@ public class Game {
         FingerRise.f1.update();
         FingerRise.f2.update();
 
+        checkMenuPointer();
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setAutoShapeType(true);
 
         if (!inMenu) {
             try {
-                LevelManager.drawLevel(shapeRenderer,DeltaTime);
+                LevelManager.drawLevel(shapeRenderer, DeltaTime);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -52,7 +53,6 @@ public class Game {
         }
 
 
-
         FingerRise.f1.draw(shapeRenderer);
         FingerRise.f2.draw(shapeRenderer);
 
@@ -60,8 +60,67 @@ public class Game {
 
         if (!inMenu) {
             drawBackButton(batch);
+        } else {
+            drawDragToOpenLevelSelection(shapeRenderer, batch,DeltaTime);
         }
 
+    }
+
+   private static float levelSelectionDiff = 0;
+    private static float levelSelectionCurrentOrigin = 0;
+
+    private static void drawDragToOpenLevelSelection(ShapeRenderer shapeRenderer, SpriteBatch batch, float deltaTime) {
+        float levelSelectionPointerDiff = (Gdx.graphics.getHeight() - Gdx.input.getY((int) mousePressPosMenu.z)) - (mousePressPosMenu.y);
+        float maxDiff = Gdx.graphics.getHeight() / 19f * 16 - Gdx.graphics.getHeight() / 19f;
+        if (isMenuPointerPressed) {
+            if (Math.abs(levelSelectionPointerDiff) < 3 ) {
+
+                levelSelectionPointerDiff = 0;
+
+            }
+            if( (levelSelectionPointerDiff +Gdx.graphics.getHeight() / 19f) > (Gdx.graphics.getHeight() / 19f * 16)) {
+                levelSelectionDiff = (Gdx.graphics.getHeight() / 19f * 15);
+            }
+            levelSelectionDiff = levelSelectionCurrentOrigin+ levelSelectionPointerDiff;
+
+
+        }else{
+                if (!(levelSelectionPointerDiff<0&&Math.abs(levelSelectionDiff-(Gdx.graphics.getHeight() / 19f * 15))  >= (Gdx.graphics.getHeight() / 19f * 15) / 4.5f)&&levelSelectionDiff >= (Gdx.graphics.getHeight() / 19f * 15) / 4.5f) {
+                    levelSelectionDiff -= (levelSelectionDiff-(Gdx.graphics.getHeight() / 19f * 15)) * 1 / 10f * deltaTime * 62.5f;
+                    levelSelectionCurrentOrigin = (Gdx.graphics.getHeight() / 19f * 15);
+
+                } else {
+
+                    levelSelectionDiff -= levelSelectionDiff * 1 / 10f * deltaTime * 62.5f;
+                    levelSelectionCurrentOrigin = 0;
+                }
+
+
+        }
+
+        batch.begin();
+        FingerRise.arrow_up.setPosition(Gdx.graphics.getWidth() / 2f - FingerRise.arrow_up.getWidth() / 2f, Gdx.graphics.getHeight() / 19f + levelSelectionDiff);
+        FingerRise.arrow_up.setRotation((180 / maxDiff) * levelSelectionDiff);
+        FingerRise.arrow_up.draw(batch);
+        FingerRise.glyphLayout.setText(FingerRise.smallFont, "Level");
+
+        FingerRise.smallFont.draw(batch, "Level", Gdx.graphics.getWidth() / 2f - FingerRise.glyphLayout.width / 2, Gdx.graphics.getHeight() / 17f+levelSelectionDiff);
+
+        batch.end();
+    }
+
+    private static void checkMenuPointer() {
+        if (!isMenuPointerPressed&&Gdx.input.justTouched()) {
+            for (int i = 0; i < FingerPoint.globalUsedFingers.length; i++) {
+                if (FingerRise.f2.getPointer() == i || FingerRise.f1.getPointer() == i) continue;
+                if (!Gdx.input.isTouched(i)) continue;
+                mousePressPosMenu.set(Gdx.input.getX(i), Gdx.graphics.getHeight() - Gdx.input.getY(i), i);
+                isMenuPointerPressed = true;
+                break;
+            }
+        }
+
+        if (isMenuPointerPressed && !Gdx.input.isTouched((int) mousePressPosMenu.z)) isMenuPointerPressed = false;
     }
 
     private static void drawBackButton(SpriteBatch batch) {

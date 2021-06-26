@@ -21,8 +21,10 @@ public class FingerRise extends ApplicationAdapter {
 	public static FingerPoint f1;
 	public static FingerPoint f2;
 	public static Texture back;
+	public static Sprite arrow_up;
 	public static BitmapFont titleFont;
 	public static BitmapFont font;
+	public static BitmapFont smallFont;
 	public static GlyphLayout glyphLayout;
 	public static Sound click;
 	public static Preferences settings;
@@ -30,6 +32,7 @@ public class FingerRise extends ApplicationAdapter {
 	@Override
 	public void create () {
 		back = new Texture("back.png");
+		arrow_up = new Sprite( new Texture("arrow_up.png"));
 		batch = new SpriteBatch();
 		click = Gdx.audio.newSound(Gdx.files.internal("click.wav"));
 		shapeRenderer = new ShapeRenderer();
@@ -43,6 +46,7 @@ public class FingerRise extends ApplicationAdapter {
 
 		titleFont = buildFont("titlefont.ttf",150,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890\"!`?'.,;:()[]{}<>|/@\\^$-%+=#_&~*");
 		font = buildFont("font.ttf",110,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890\"!`?'.,;:()[]{}<>|/@\\^$-%+=#_&~*");
+		smallFont = buildFont("font.ttf",85,"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890\"!`?'.,;:()[]{}<>|/@\\^$-%+=#_&~*");
 		LevelConfig.init();
 
 		System.out.println(LevelConfig.currentLevel);

@@ -85,9 +85,9 @@ public class FingerPoint {
 
     }
 
-    private int lowestPossiblePointer(float x, float y) {
+    protected static int lowestPossiblePointer(float x, float y) {
         for (int i = 0; i < globalUsedFingers.length; i++) {
-            if (!globalUsedFingers[i] && isPointerRange(i, x, y)) {
+            if (!globalUsedFingers[i] && (isPointerRange(i, x, y)||(x==-1&&y==-1))) {
                 return i;
             }
         }
@@ -95,15 +95,15 @@ public class FingerPoint {
 
     }
 
-    private boolean isPointerRange(int pointer, float x, float y) {
+    private static boolean isPointerRange(int pointer, float x, float y) {
         return (object(x - radius - 20, y - radius - 20, radius * 2 + 40, radius * 2 + 40, Gdx.input.getX(pointer), Gdx.graphics.getHeight() - Gdx.input.getY(pointer), 3, 3));
     }
 
-    Rectangle rec1 = new Rectangle();
-    Rectangle rec2 = new Rectangle();
+   static Rectangle rec1 = new Rectangle();
+    static Rectangle rec2 = new Rectangle();
 
 
-    public boolean object(float obj1_x, float obj1_y, float obj1_w, float obj1_h, float obj2_x, float obj2_y, float obj2_w, float obj2_h) {
+    public static boolean object(float obj1_x, float obj1_y, float obj1_w, float obj1_h, float obj2_x, float obj2_y, float obj2_w, float obj2_h) {
 
 
         rec1.set(obj1_x, obj1_y, obj1_w, obj1_h);
@@ -175,5 +175,7 @@ public class FingerPoint {
 
     }
 
-
+    public int getPointer() {
+        return pointer;
+    }
 }
