@@ -62,7 +62,6 @@ public class FingerRise extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 
-		Game.render(Gdx.graphics.getDeltaTime(),shapeRenderer,batch);
 
 
 		batch.begin();
@@ -74,6 +73,7 @@ public class FingerRise extends ApplicationAdapter {
 		}
 		batch.end();
 
+		Game.render(Gdx.graphics.getDeltaTime(),shapeRenderer,batch);
 
 
 
